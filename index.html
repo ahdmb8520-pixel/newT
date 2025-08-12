@@ -1,39 +1,104 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>عداد من Google Sheet</title>
-<style>
-  body { font-family: sans-serif; text-align: center; margin-top: 60px; direction: rtl; }
-  .count { font-size: 36px; margin: 15px; }
-</style>
+  <meta charset="UTF-8">
+  <title>عداد الأدوات</title>
+  <style>
+    body {
+      background-color: #f7f9fc;
+      font-family: "Cairo", sans-serif;
+      padding: 40px 10px;
+      margin: 0;
+      text-align: center;
+    }
+
+    h2 {
+      color: #2c3e50;
+      margin-bottom: 40px;
+    }
+
+    .counter-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .counter {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px;
+      width: 200px;
+      transition: transform 0.3s ease;
+    }
+
+    .counter:hover {
+      transform: translateY(-5px);
+    }
+
+    .counter img {
+      width: 50px;
+      height: 50px;
+    }
+
+    .number {
+      font-size: 32px;
+      color: #34495e;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-<h1>العدادات الحالية</h1>
-<div class="count">🖊️ قلم أزرق: <span id="blue">-</span></div>
-<div class="count">🖋️ قلم أخضر: <span id="green">-</span></div>
-<div class="count">📏 مسطرة: <span id="ruler">-</span></div>
 
-<script>
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT2CtxC9rfEZYaYgc5ujs-ZTVhvFqt9lyJOSSYGyPddPr1w1LZOigHbHLSgABN2rL7AEfT9aEFGo8Dz/pub?gid=696352829&single=true&output=csv";
+  <h2>📊 عداد الأدوات</h2>
+  <div class="counter-container">
+    <div class="counter">
+      <img src="blue-pen.png" alt="قلم أزرق">
+      <div class="number" id="blue-pen">0</div>
+    </div>
+    <div class="counter">
+      <img src="green-pen.png" alt="قلم أخضر">
+      <div class="number" id="green-pen">0</div>
+    </div>
+    <div class="counter">
+      <img src="ruler.png" alt="مسطرة">
+      <div class="number" id="ruler">0</div>
+    </div>
+  </div>
 
-function fetchCounts() {
-  fetch(CSV_URL)
-    .then(response => {
-      if (!response.ok) throw new Error("فشل التحميل: " + response.status);
-      return response.text();
-    })
-    .then(csv => {
-      const rows = csv.trim().split("\n").map(r => r.split(","));
-      // الصف الأخير (بعد العناوين)
-      const lastRow = rows[rows.length - 1];
-      const blue  = lastRow[1] || "0";
-      const green = lastRow[2] || "0";
-      const ruler = lastRow[3] || "0";
-      document.getElementById("blue").textContent  = blue;
-      document.getElementById("green").textContent = green;
-      document.getElementById("ruler").textContent = ruler;
-    })
+  <script>
+    const sheetId = "133aMLenBJi-vxhckW6OPkLY0JnQ4q-kgdT4itKHr8Xg";
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+
+    fetch(url)
+      .then(res => res.text())
+      .then(text => {
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        const rows = json.table.rows;
+
+        let bluePenCount = 0;
+        let greenPenCount = 0;
+        let rulerCount = 0;
+
+        rows.forEach(row => {
+          const cells = row.c;
+          bluePenCount += Number(cells[1]?.v || 0);
+          greenPenCount += Number(cells[2]?.v || 0);
+          rulerCount += Number(cells[3]?.v || 0);
+        });
+
+        document.getElementById("blue-pen").textContent = bluePenCount;
+        document.getElementById("green-pen").textContent = greenPenCount;
+        document.getElementById("ruler").textContent = rulerCount;
+      })
+      .catch(err => {
+        console.error("فشل في جلب البيانات:", err);
+      });
+  </script>
+
+</body>
+</html>
     .catch(err => {
       console.error(err);
       document.getElementById("blue").textContent =
