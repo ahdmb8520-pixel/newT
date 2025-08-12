@@ -2,73 +2,37 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>عداد الأدوات</title>
+  <title>عداد الأقلام من Google Sheets</title>
   <style>
     body {
-      background-color: #f7f9fc;
       font-family: "Cairo", sans-serif;
-      padding: 40px 10px;
-      margin: 0;
+      background: #f2f2f2;
       text-align: center;
+      padding: 40px;
     }
-
     h2 {
       color: #2c3e50;
-      margin-bottom: 40px;
     }
-
-    .counter-container {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      flex-wrap: wrap;
-    }
-
     .counter {
-      background-color: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: inline-block;
+      background: white;
+      margin: 10px;
       padding: 20px;
-      width: 200px;
-      transition: transform 0.3s ease;
-    }
-
-    .counter:hover {
-      transform: translateY(-5px);
-    }
-
-    .counter img {
-      width: 50px;
-      height: 50px;
-    }
-
-    .number {
-      font-size: 32px;
-      color: #34495e;
-      margin-top: 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      font-size: 20px;
     }
   </style>
 </head>
 <body>
 
-  <h2>📊 عداد الأدوات</h2>
-  <div class="counter-container">
-    <div class="counter">
-      <img src="blue-pen.png" alt="قلم أزرق">
-      <div class="number" id="blue-pen">0</div>
-    </div>
-    <div class="counter">
-      <img src="green-pen.png" alt="قلم أخضر">
-      <div class="number" id="green-pen">0</div>
-    </div>
-    <div class="counter">
-      <img src="ruler.png" alt="مسطرة">
-      <div class="number" id="ruler">0</div>
-    </div>
-  </div>
+  <h2>📊 العداد الحالي</h2>
+  <div class="counter">🖊️ قلم أزرق: <span id="blue">0</span></div>
+  <div class="counter">🖋️ قلم أخضر: <span id="green">0</span></div>
+  <div class="counter">📏 مسطرة: <span id="ruler">0</span></div>
 
   <script>
-    const sheetId = "133aMLenBJi-vxhckW6OPkLY0JnQ4q-kgdT4itKHr8Xg";
+    const sheetId = "133aMLenBJi-vxhckW6OPkLY0JnQ4q-kgdT4itKHr8Xg"; // من رابط Google Sheets
     const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
     fetch(url)
@@ -77,19 +41,23 @@
         const json = JSON.parse(text.substr(47).slice(0, -2));
         const rows = json.table.rows;
 
-        let bluePenCount = 0;
-        let greenPenCount = 0;
+        let blueCount = 0;
+        let greenCount = 0;
         let rulerCount = 0;
 
-        rows.forEach(row => {
-          const cells = row.c;
-          bluePenCount += Number(cells[1]?.v || 0);
-          greenPenCount += Number(cells[2]?.v || 0);
-          rulerCount += Number(cells[3]?.v || 0);
+        rows.forEach((row, index) => {
+          if (index === 0) return; // تخطي الصف العنوان
+          const blue = parseInt(row.c[1]?.v || 0);
+          const green = parseInt(row.c[2]?.v || 0);
+          const ruler = parseInt(row.c[3]?.v || 0);
+
+          blueCount += isNaN(blue) ? 0 : blue;
+          greenCount += isNaN(green) ? 0 : green;
+          rulerCount += isNaN(ruler) ? 0 : ruler;
         });
 
-        document.getElementById("blue-pen").textContent = bluePenCount;
-        document.getElementById("green-pen").textContent = greenPenCount;
+        document.getElementById("blue").textContent = blueCount;
+        document.getElementById("green").textContent = greenCount;
         document.getElementById("ruler").textContent = rulerCount;
       })
       .catch(err => {
@@ -97,18 +65,5 @@
       });
   </script>
 
-</body>
-</html>
-    .catch(err => {
-      console.error(err);
-      document.getElementById("blue").textContent =
-        document.getElementById("green").textContent =
-        document.getElementById("ruler").textContent = "خطأ";
-    });
-}
-
-fetchCounts();
-setInterval(fetchCounts, 5000); // تحديث كل 5 ثوانٍ
-</script>
 </body>
 </html>
